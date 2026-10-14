@@ -28,6 +28,21 @@ render_header(
     badge_text="Academic Machine Learning Lab Project"
 )
 
+# Ensure sample data is seeded and models exist for zero-setup cloud deployments
+seed_sample_data_if_empty()
+
+from src.topic_classifier import TOPIC_MODEL_PATH
+from src.sentiment_classifier import SENTIMENT_MODEL_PATH
+
+if not TOPIC_MODEL_PATH.exists() or not SENTIMENT_MODEL_PATH.exists():
+    try:
+        from scripts.prepare_data import main as prep_main
+        from scripts.train_models import train_all_models
+        prep_main()
+        train_all_models()
+    except Exception as e:
+        print(f"Notice during first-time cloud setup: {e}")
+
 # Load real metrics
 total_db_records = get_record_count()
 eval_data = load_evaluation_results()
