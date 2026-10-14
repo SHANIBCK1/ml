@@ -1,7 +1,4 @@
-# NewsInsight AI Dockerfile
 FROM python:3.11-slim
-
-WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -9,22 +6,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install
-COPY requirements.txt .
+# Set up user according to Hugging Face Spaces requirements (UID 1000)
+RUN useradd -m -u 1000 user
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
+
+WORKDIR $HOME/app
+
+# Install Python requirements
+COPY --chown=user:user requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY . .
+COPY --chown=user:user . .
 
-# Run dataset preparation and model training during build
+# Switch to non-root user
+USER user
+
+# Prepare benchmark data and train models during build
 RUN python scripts/prepare_data.py && \
     python scripts/train_models.py
 
-# Expose Streamlit default port
-EXPOSE 8501
+# Hugging Face Spaces standard port is 7860
+EXPOSE 7860
 
-# Run Streamlit
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health || exit 1
-
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0"]

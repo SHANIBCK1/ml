@@ -1,3 +1,14 @@
+---
+title: NewsInsight AI
+emoji: 📰
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # NewsInsight AI: AI-Based News Classification & Sentiment Intelligence
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
